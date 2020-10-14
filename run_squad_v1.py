@@ -26,22 +26,22 @@ SQUAD_PATH=../../nlp_model/squad11/
 
 python3 run_squad_v1.py \
 --albert_config_file="../../nlp_model/albert_base_v2/albert_config.json" \
---output_dir="../../nlp_model/squad11/albert_large_v2" \
+--output_dir="../../nlp_model/squad11/albert_base_v2" \
 --train_file="../../nlp_model/squad11/train_test.json" \
 --predict_file="../../nlp_model/squad11/test.json" \
---train_feature_file="../../nlp_model/squad11/albert_large_v2/train.tfrecord" \
---predict_feature_file="../../nlp_model/squad11/albert_large_v2/dev.tfrecord" \
---predict_feature_left_file="../../nlp_model/squad11/albert_large_v2/pred_left_file.pkl" \
+--train_feature_file="../../nlp_model/squad11/albert_base_v2/train.tfrecord" \
+--predict_feature_file="../../nlp_model/squad11/albert_base_v2/dev.tfrecord" \
+--predict_feature_left_file="../../nlp_model/squad11/albert_base_v2/pred_left_file.pkl" \
 --init_checkpoint="../../nlp_model/albert_base_v2/model.ckpt-best" \
 --spm_model_file="../../nlp_model/albert_base_v2/30k-clean.model" \
 --vocab_file="../../nlp_model/albert_base_v2/30k-clean.vocab"\
 --do_lower_case \
---max_seq_length=384 \
+--max_seq_length=256 \
 --doc_stride=128 \
 --max_query_length=64 \
 --do_train \
 --do_predict \
---train_batch_size=1000 \
+--train_batch_size=24 \
 --predict_batch_size=8 \
 --learning_rate=3e-5 \
 --num_train_epochs=1.0 \
