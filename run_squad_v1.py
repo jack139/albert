@@ -20,6 +20,38 @@ from __future__ import division
 from __future__ import print_function
 
 
+'''
+ALBERT_ROOT=../../nlp_model/albert_base_v2/ 
+SQUAD_PATH=../../nlp_model/squad11/
+
+python3 run_squad_v1.py \
+--albert_config_file="../../nlp_model/albert_base_v2/albert_config.json" \
+--output_dir="../../nlp_model/squad11/albert_large_v2" \
+--train_file="../../nlp_model/squad11/train_test.json" \
+--predict_file="../../nlp_model/squad11/test.json" \
+--train_feature_file="../../nlp_model/squad11/albert_large_v2/train.tfrecord" \
+--predict_feature_file="../../nlp_model/squad11/albert_large_v2/dev.tfrecord" \
+--predict_feature_left_file="../../nlp_model/squad11/albert_large_v2/pred_left_file.pkl" \
+--init_checkpoint="../../nlp_model/albert_base_v2/model.ckpt-best" \
+--spm_model_file="../../nlp_model/albert_base_v2/30k-clean.model" \
+--vocab_file="../../nlp_model/albert_base_v2/30k-clean.vocab"\
+--do_lower_case \
+--max_seq_length=384 \
+--doc_stride=128 \
+--max_query_length=64 \
+--do_train \
+--do_predict \
+--train_batch_size=1000 \
+--predict_batch_size=8 \
+--learning_rate=3e-5 \
+--num_train_epochs=1.0 \
+--warmup_proportion=.1 \
+--save_checkpoints_steps=1000 \
+--n_best_size=20 \
+--max_answer_length=30
+'''
+
+
 import json
 import os
 import random
@@ -30,8 +62,8 @@ from albert import squad_utils
 import six
 import tensorflow.compat.v1 as tf
 
-from tensorflow.contrib import cluster_resolver as contrib_cluster_resolver
-from tensorflow.contrib import tpu as contrib_tpu
+from tensorflow.distribute import cluster_resolver as contrib_cluster_resolver
+from tensorflow.compat.v1.estimator import tpu as contrib_tpu
 
 
 # pylint: disable=g-import-not-at-top
@@ -40,6 +72,7 @@ if six.PY2:
 else:
   import pickle
 # pylint: enable=g-import-not-at-top
+
 
 flags = tf.flags
 
@@ -120,7 +153,7 @@ flags.DEFINE_integer("train_batch_size", 32, "Total batch size for training.")
 flags.DEFINE_integer("predict_batch_size", 8,
                      "Total batch size for predictions.")
 
-flags.DEFINE_float("learning_rate", 5e-5, "The initial learning rate for Adam.")
+flags.DEFINE_float("learning_rate", 3e-5, "The initial learning rate for Adam.")
 
 flags.DEFINE_float("num_train_epochs", 3.0,
                    "Total number of training epochs to perform.")
@@ -169,7 +202,7 @@ tf.flags.DEFINE_string(
 tf.flags.DEFINE_string("master", None, "[Optional] TensorFlow master URL.")
 
 flags.DEFINE_integer(
-    "num_tpu_cores", 8,
+    "num_tpu_cores", 4,
     "Only used if `use_tpu` is True. Total number of TPU cores to use.")
 
 flags.DEFINE_bool(
@@ -409,8 +442,8 @@ def main(_):
       for result in estimator.predict(
           predict_input_fn, yield_single_examples=True,
           checkpoint_path=checkpoint):
-        if len(all_results) % 1000 == 0:
-          tf.logging.info("Processing example: %d" % (len(all_results)))
+        #if len(all_results) % 1000 == 0:
+        tf.logging.info("Processing example: %d" % (len(all_results)))
         unique_id = int(result["unique_ids"])
         start_log_prob = [float(x) for x in result["start_log_prob"].flat]
         end_log_prob = [float(x) for x in result["end_log_prob"].flat]

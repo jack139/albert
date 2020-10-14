@@ -34,9 +34,9 @@ import six
 from six.moves import map
 from six.moves import range
 import tensorflow.compat.v1 as tf
-from tensorflow.contrib import data as contrib_data
-from tensorflow.contrib import layers as contrib_layers
-from tensorflow.contrib import tpu as contrib_tpu
+from tensorflow.compat.v1.data import experimental as contrib_data
+#from tensorflow.contrib import layers as contrib_layers
+from tensorflow.compat.v1.estimator import tpu as contrib_tpu
 
 _PrelimPrediction = collections.namedtuple(  # pylint: disable=invalid-name
     "PrelimPrediction",
@@ -1477,7 +1477,8 @@ def create_v2_model(albert_config, is_training, input_ids, input_mask,
               albert_config.initializer_range),
           activation=tf.tanh,
           name="dense_0")
-      end_logits = contrib_layers.layer_norm(end_logits, begin_norm_axis=-1)
+      #end_logits = contrib_layers.layer_norm(end_logits, begin_norm_axis=-1)
+      end_logits = tf.keras.layers.LayerNormalization(axis=-1,epsilon=1e-12,dtype=tf.float32)(end_logits)
 
       end_logits = tf.layers.dense(
           end_logits,
@@ -1508,7 +1509,8 @@ def create_v2_model(albert_config, is_training, input_ids, input_mask,
               albert_config.initializer_range),
           activation=tf.tanh,
           name="dense_0")
-      end_logits = contrib_layers.layer_norm(end_logits, begin_norm_axis=-1)
+      #end_logits = contrib_layers.layer_norm(end_logits, begin_norm_axis=-1)
+      end_logits = tf.keras.layers.LayerNormalization(axis=-1,epsilon=1e-12,dtype=tf.float32)(end_logits)
       end_logits = tf.layers.dense(
           end_logits,
           1,
